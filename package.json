@@ -1,5 +1,33 @@
 {
+  "type": "module",
+
   "dependencies": {
     "graphviz-wasm": "^3.0.0"
-  }
+  },
+
+  "name": "kts-node",
+  "version": "1.0.0",
+  "description": "Knowledge Transformation System (KTS) implementation in node.js",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/wissenswandler/kts-node.git"
+  },
+  "keywords": [
+    "KTS",
+    "causality",
+    "information",
+    "visualization",
+    "valuestream"
+  ],
+  "author": "Boran Gögetap",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://bitbucket.org/wissenswandler/kts-node/issues"
+  },
+  "homepage": "https://bitbucket.org/wissenswandler/kts-node#readme"
 }
