@@ -1,15 +1,13 @@
 {
   "type": "module",
-
   "dependencies": {
-    "graphviz-wasm": "^3.0.0"
+    "graphviz-wasm": "^3.0.0",
+    "node-libcurl": "^3.0.0"
   },
-
   "name": "kts-node",
   "version": "1.0.0",
   "description": "Knowledge Transformation System (KTS) implementation in node.js",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
