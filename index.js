@@ -1,5 +1,8 @@
+// enhance all console output with colors
+import chalk from 'chalk'	
+
 import graphviz from 'graphviz-wasm'
-await graphviz.loadWASM()
+await  graphviz.loadWASM()
 
 let dotsource_filename = "graph.dot"
 
@@ -18,6 +21,16 @@ if (process.argv.length > 3)
 
 import fs from 'fs'
 
+if( ! Boolean( process.stdin.isTTY ) )
+{
+	if( process.argv.length > 2 )
+	{
+		console.warn( chalk.yellowBright ( `ignoring command line argument "${process.argv[2]}" because we are piped to.` ) )
+	}
+
+	build_diagram_from_stdin()
+}
+else
 // build diagram only if source file is newer than product file	
 fs.stat( dotsource_filename, (err, source_stats) => 
 {
@@ -25,19 +38,8 @@ fs.stat( dotsource_filename, (err, source_stats) =>
 	{		
 		// read from stdin instead
 		// open stdin for reading
-		console.warn( `no file with name "${dotsource_filename}",\nreading DOT source from stdin. Type CTRL-D to signal end of your input...` )
-
-		process.stdin.resume();
-		process.stdin.setEncoding('utf8');
-		// read from stdin
-		let stdin = "";
-		process.stdin.on('data', function(chunk) {
-			stdin += chunk;
-		});
-		process.stdin.on('end', function() {
-			const svg = build_diagram_from_string( stdin )
-			return console.log( svg )
-		});
+		console.warn( chalk.yellowBright ( `no file with name "${dotsource_filename}",` ) )
+		return build_diagram_from_stdin()
 	}
 	else
 	fs.stat( svgproduct_filename, (err, product_stats) =>
@@ -54,7 +56,7 @@ fs.stat( dotsource_filename, (err, source_stats) =>
 		else
 		// both source and product exist and product is up to date
 		{
-			console.warn( `no need to build ${svgproduct_filename} now but let's watch for changes and build then...` )
+			console.warn( chalk.grey( `no need to build ${svgproduct_filename} now but let's watch for changes and build then...` ) )
 			fs.watchFile( dotsource_filename, function(curr, prev)
 			{
 				build_diagram_from_file( `\n${dotsource_filename} was touched,` )
@@ -62,6 +64,23 @@ fs.stat( dotsource_filename, (err, source_stats) =>
 		}
 	})
 })
+
+function build_diagram_from_stdin()
+{
+	console.warn( chalk.green( "reading DOT source from stdin. Type CTRL-D to signal end of your input..." ) )
+	
+	process.stdin.resume();
+	process.stdin.setEncoding('utf8');
+	// read from stdin
+	let stdin = "";
+	process.stdin.on('data', function(chunk) {
+		stdin += chunk;
+	});
+	process.stdin.on('end', function() {
+		const svg = build_diagram_from_string( stdin )
+		return console.log( svg )
+	});
+}
 
 
 /*
@@ -73,13 +92,13 @@ fs.stat( dotsource_filename, (err, source_stats) =>
  */
 function build_diagram_from_file (log_comment)
 {
-	console.warn( log_comment )
+	console.warn( chalk.grey( log_comment ) )
 
 	fs.readFile( dotsource_filename, 'utf8', function (err,data)
 	{
 		if (err)
 		{
-			return console.error(err);
+			return console.error( chalk.red( err) )
 		}
 
 		const svg_kts = build_diagram_from_string( data )
@@ -88,10 +107,10 @@ function build_diagram_from_file (log_comment)
 		{
 			if (err)
 			{
-				console.error(err);
+				console.error( chalk.red( err ) )
 			}
 			else
-			console.warn( svgproduct_filename + " written." )
+			console.warn( chalk.green( svgproduct_filename + " written." ) )
 		})  
 	})
 }
@@ -116,11 +135,11 @@ function build_diagram_from_string( dot_string )
 	catch (e)
 	{
 		// inspect properties of the caught error
-		console.error( e.name );
-		console.error( e.message );
-		console.error( e.fileName );
-		console.error( e.lineNumber );
-		console.error( e.columnNumber );
+		// console.error( e.name );			// constant: "Error"
+		   console.error( chalk.red( e.message ) );		// contains trailing newline
+		// console.error( e.fileName );		// constantly "undefined"
+		// console.error( e.lineNumber );	// constantly "undefined"
+		// console.error( e.columnNumber );	// constantly "undefined"
 
 		return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 				<svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
