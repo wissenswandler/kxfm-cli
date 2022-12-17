@@ -3,7 +3,7 @@
   "dependencies": {
     "chalk": "^5.2.0",
     "graphviz-wasm": "^3.0.0",
-    "node-libcurl": "^3.0.0"
+    "jira-client": "^8.2.2"
   },
   "name": "kts-node",
   "version": "1.0.0",
