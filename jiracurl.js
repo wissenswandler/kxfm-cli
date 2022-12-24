@@ -1,25 +1,28 @@
-// get list of issues from JIRA REST API using jql query
-
 import jiraAPI from 'jira-client'
+import KTS4Jira from './KTS4Jira.js';
+
 var jiraclient = new jiraAPI({
     protocol: 'https',
     host: 'knowhere.atlassian.net',
     username    : '',
     password    : '',
-    apiVersion: '2',
+    apiVersion: 'latest',
     strictSSL: true
 });
 
-let k1l = jiraclient.searchJira
+let nodes=[];
+let edges=[];
+
+let k1l = jiraclient
+    .searchJira
     (   'project = K1L', 
         {   maxResults: 1000,
-            fields : ['summary']
+            fields : ['summary','description','issuetype','issuelinks','parent']
         }
-    ).then(issues => {
-
-    // log the summary field of each issue
-    issues.issues.forEach(issue =>
+    )
+    .then
+    (   searchResult =>
     {
-        console.log( issue.key + " : " + issue.fields.summary )
-    })
-})
+        console.log(  KTS4Jira.jiraIssueArray2dotString( searchResult.issues )  )
+    }
+    )
