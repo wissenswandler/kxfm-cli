@@ -1,5 +1,14 @@
+/*
+ CLI to fetch from Jira Cloud REST API
+
+ @param {String} jiraCloudInstance - Jira Cloud instance name
+ @param {String} jqlText - JQL query text
+ @returns {Array} - array of Jira issues
+ 
+ results could be piped to jiraIssueArray2dotString.js in order to create a GraphViz DOT file
+ */
+
 import jiraAPI from 'jira-client'
-import KTS4Jira from './KTS4Jira.js';
 import chalk from 'chalk';
 
 // read Jira Cloud instance name from first command line argument or use default
@@ -52,7 +61,7 @@ jiraclient
 .then
 (   searchResult =>
 {
-    console.log(  KTS4Jira.jiraIssueArray2dotString( searchResult.issues )  )
+    console.log( JSON.stringify( searchResult.issues )  )
 }
 )
 .catch
