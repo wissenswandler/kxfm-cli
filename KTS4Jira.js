@@ -6,7 +6,7 @@ export default class KTS4Jira
 * @param {Array} issueArray - array of Jira issues
 * @returns {String} - DOT string
 */
-static jiraIssueArray2dotString( issueArray )
+static jiraIssueArray2dotString( issueArray, browsePath = "https://wissenswandler.atlassian.net/browse" )
 {
     let tempString = "digraph { rankdir=BT ";
 
@@ -15,11 +15,13 @@ static jiraIssueArray2dotString( issueArray )
      */
     issueArray.forEach(issue =>
     {
-        tempString += "\n<" + issue.key + ">"
+        tempString += "\n" 
+            + "# self: " + issue.self + "\n"
+            + "<" + issue.key + ">"
 		    + " ["
 	   	    + this.renderAttributeIfExists( "label"   , issue.fields.summary     )
             + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
-		    + " URL=\"https://wissenswandler.atlassian.net/browse/" + issue.key + "\""
+		    + " URL=\"" + browsePath + "/" + issue.key + "\""
 		    + " ]";
     }
     );
@@ -49,26 +51,55 @@ static renderAttributeIfExists( name, value )
 /*
  * return a string that is safe to use as a label in a DOT file
  * by replacing double quotes with escaped double quotes
- * @param {String} text - text to be used as a label
+ * @param {String} text - text to be used as a label (NOTE it could also be an ADO)
  * @returns {String} - safe text to be used as a label which is delimited by double quotes(!)
- *
- * surprisingly throws an error (which is caught) only in a FORGE environment (not in node.js 18)
- * if text is "empty":
- *  TypeError: text.replace is not a function
- *  typeof text: object
- * This case gets caught in a NODE.JS environment by the expression !text .
  */
 static safeAttribute( text )
 {
+    if( text == null )
+    {
+        console.warn( "found a NULL text (which is OK)" );
+        return "";
+    } 
+    if( typeof text === "object" )
+    {
+        /* this could be an Atlassian Document Object (ADO) e.g. like that:
+        */
+        const ado =
+        {
+            "version":1,
+            "type":"doc",
+            "content":
+            [
+                {
+                    "type":"paragraph",
+                    "content":
+                    [
+                        {
+                            "type":"text",
+                            "text":"Typ-1 Hypervisor (native / bare metal)"
+                        }
+                    ]
+                }
+            ]
+        };
+        console.warn( "found a text OBJECT (that is not null) and don't know how to handle that, returning empty string: " + JSON.stringify( text ) );
+        return "";
+    }
+    if( ! typeof text.replace === "function" )
+    {
+        console.warn( "found a text that is not a function and don't know how to handle that, returning empty string: " + JSON.stringify( text ) );
+        return "";
+    }
     try
     {
-        return (text && typeof text.replace === "function" ) ? text.replace( /"/g, "\\\"" ) : ""
+        return text.replace( /"/g, "\\\"" )
     }
     catch( error )
     {
-	console.error( error );
-	console.debug( "typeof text: " + typeof text );
-	return ""
+    	console.error( error );
+	    console.warn( "typeof text: " + typeof text );
+    	return "";
     }
 }
 

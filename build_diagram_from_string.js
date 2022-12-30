@@ -18,7 +18,7 @@ export function build_diagram_from_string(dot_string)
 			dot_string.replace(/(graph.*\{)/, '$1 node[id="\\N"] edge[id="\\T___\\H"] ');
 
 		const svg = graphviz.layout(kts_dot_string);
-		return rewrite_GraphViz_SVG_to_KTS_SVG(svg);
+		return rewrite_GraphViz_SVG_to_KTS_SVG( svg );
 	}
 	catch (e)
 	{

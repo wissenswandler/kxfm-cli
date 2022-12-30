@@ -7,6 +7,6 @@ process.stdin.on("data", (chunk) => {
     });
 process.stdin.on("end", () => {
     const issueArray = JSON.parse(input);
-    console.log(KTS4Jira.jiraIssueArray2dotString(issueArray));
+    console.log( KTS4Jira.jiraIssueArray2dotString( issueArray , process.argv[2] )  );
     }
     );

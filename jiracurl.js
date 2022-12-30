@@ -38,12 +38,17 @@ such as browsing Jira projects or Jira issues with 'anonymous' access privilege 
 ));
 }
 
+/*
+ * NOTE: apiVersion 'latest' seems to be interpreted as '2', at least in case of /search operation!
+ * 2/search returns multi-line text fields (such as description) of type String, whereas
+ * 3/search and latest/search return multi-line text fields of ADO type JSON object (see comment below)
+ */
 var jiraclient = new jiraAPI({
     protocol: 'https',
     host: jiraCloudInstance + '.atlassian.net',
     username    : atlassianUser,
     password    : atlassianPassword,
-    apiVersion: 'latest',
+    apiVersion: '2', // see NOTE above
     strictSSL: true
 });
 
