@@ -9,6 +9,10 @@ export default class KTS4Jira
 static jiraIssueArray2dotString( issueArray )
 {
     let tempString = "digraph { rankdir=BT ";
+
+    /*
+     * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
+     */
     issueArray.forEach(issue =>
     {
         tempString += "\n<" + issue.key + ">"
@@ -17,6 +21,13 @@ static jiraIssueArray2dotString( issueArray )
             + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
 		    + " URL=\"https://wissenswandler.atlassian.net/browse/" + issue.key + "\""
 		    + " ]";
+    }
+    );
+    /*
+     * render edges
+     */
+    issueArray.forEach(issue =>
+    {
         const k = issue.key;
         issue.fields.issuelinks.forEach(link => {
             if (link.inwardIssue) {
