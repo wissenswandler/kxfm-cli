@@ -11,7 +11,7 @@
   "description": "Knowledge Transformation System (KTS) implementation in node.js",
   "main": "dot2svg.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node jiracurl.js wissenswandler project=META | node jiraIssueArray2dotString.js | node dot2svg.js"
   },
   "repository": {
     "type": "git",
