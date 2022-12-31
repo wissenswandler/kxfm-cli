@@ -8,7 +8,7 @@ export default class KTS4Jira
 */
 static jiraIssueArray2dotString( issueArray, browsePath = "https://wissenswandler.atlassian.net/browse" )
 {
-    let tempString = "digraph { rankdir=BT ";
+    let tempString = 'digraph { rankdir=BT node[shape=box, style="rounded,filled" fillcolor=white] ';
 
     /*
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
@@ -21,7 +21,7 @@ static jiraIssueArray2dotString( issueArray, browsePath = "https://wissenswandle
 		    + " ["
 	   	    + this.renderAttributeIfExists( "label"   , issue.fields.summary     )
             + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
-		    + " URL=\"" + browsePath + "/" + issue.key + "\""
+		    + this.renderURL( issue, browsePath )
 		    + " ]";
     }
     );
@@ -42,6 +42,24 @@ static jiraIssueArray2dotString( issueArray, browsePath = "https://wissenswandle
     return tempString + "\n}";
 }
 
+static renderURL( issue, browsePath = "https://wissenswandler.atlassian.net/browse" )
+{
+    const cloudInstanceMatcheR = /https:\/\/(.+)\.atlassian\.net\//g;
+    const cloudInstanceMatcheS = [ ...issue.self.matchAll( cloudInstanceMatcheR ) ];
+
+    if( cloudInstanceMatcheS )
+    {
+        browsePath = cloudInstanceMatcheS[0][0] + "browse";
+    }
+    else
+    {
+        console.warn( "could not extract cloud instance from issue.self: " + issue.self );
+        console.warn( "using supplied / default browsePath: " + browsePath);
+    }
+
+	return " URL=\"" + browsePath + "/" + issue.key + "\""
+}
+
 static renderAttributeIfExists( name, value )
 {
     const  safeValue = this.safeAttribute( value );
@@ -58,7 +76,7 @@ static safeAttribute( text )
 {
     if( text == null )
     {
-        console.warn( "found a NULL text (which is OK)" );
+        //console.warn( "found a NULL text (which is OK)" );
         return "";
     } 
     if( typeof text === "object" )
