@@ -47,7 +47,7 @@ static renderURL( issue, browsePath = "https://wissenswandler.atlassian.net/brow
     const cloudInstanceMatcheR = /https:\/\/(.+)\.atlassian\.net\//g;
     const cloudInstanceMatcheS = [ ...issue.self.matchAll( cloudInstanceMatcheR ) ];
 
-    if( cloudInstanceMatcheS )
+    if( cloudInstanceMatcheS && cloudInstanceMatcheS[0] )
     {
         browsePath = cloudInstanceMatcheS[0][0] + "browse";
     }
