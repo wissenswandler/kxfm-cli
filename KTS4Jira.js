@@ -6,7 +6,7 @@ export default class KTS4Jira
 * @param {Array} issueArray - array of Jira issues
 * @returns {String} - DOT string
 */
-static jiraIssueArray2dotString( issueArray, browsePath = "https://wissenswandler.atlassian.net/browse" )
+static jiraIssueArray2dotString( issueArray, browsePath )
 {
     let tempString = 'digraph { rankdir=BT node[shape=box, style="rounded,filled" fillcolor=white] ';
 
@@ -42,7 +42,7 @@ static jiraIssueArray2dotString( issueArray, browsePath = "https://wissenswandle
     return tempString + "\n}";
 }
 
-static renderURL( issue, browsePath = "https://wissenswandler.atlassian.net/browse" )
+static renderURL( issue, browsePath = "https://knowhere.atlassian.net/browse" )
 {
     const cloudInstanceMatcheR = /https:\/\/(.+)\.atlassian\.net\//g;
     const cloudInstanceMatcheS = [ ...issue.self.matchAll( cloudInstanceMatcheR ) ];
@@ -53,8 +53,12 @@ static renderURL( issue, browsePath = "https://wissenswandler.atlassian.net/brow
     }
     else
     {
-        console.warn( "could not extract cloud instance from issue.self: " + issue.self );
-        console.warn( "using supplied / default browsePath: " + browsePath);
+	/*
+	 * issue records which are retrieved on Forge server contain self value like following pattern:
+	 * https://api.atlassian.com/ex/jira/03f3ce7b-7d4b-4363-9370-9e6917312a51/rest/api/2/issue/10597
+	 */
+        // console.warn( "could not extract cloud instance from issue.self: " + issue.self );
+        // console.warn( "using supplied / default browsePath: " + browsePath);
     }
 
 	return " URL=\"" + browsePath + "/" + issue.key + "\""
