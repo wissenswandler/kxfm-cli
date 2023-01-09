@@ -4,7 +4,30 @@
  */
 export function rewrite_GraphViz_SVG_to_KTS_SVG( svg, libPath = "https://wissenswandler.github.io/lib" )
 {
+	if( ! (typeof svg === 'string')  ) 
+	{
+		console.debug( "SVG of type " + typeof svg + " = " + svg );
+		throw new Error( "SVG is not of String type" );
+	}
+
 	const svgarray = svg.split(/\r?\n/);
+
+	let swoppers = [8,9];
+	// test whether line 9 consists of pattern ^<title>.+</title>$ ONLY and line 8 consists of pattern ^<g.+>$
+	if
+	(	
+		svgarray[9].match(/^<title>.+<\/title>$/)
+		&&
+		svgarray[8].match(/^<g.+>$/)
+	)
+	{
+		//console.debug( "swopping lines 9 + 8" );
+		swoppers = [9,8];
+	}
+	else
+	{
+		//console.debug( "NOT swopping lines 9 + 8" );
+	}
 
 	return `${
 		/*
@@ -18,7 +41,7 @@ export function rewrite_GraphViz_SVG_to_KTS_SVG( svg, libPath = "https://wissens
 		/*
 		 * fix GraphViz bug: reverse <title> and first <g> tags so that title will be effective in browser
 		 */
-		svgarray[9]}\n${svgarray[8]}\n${
+		svgarray[ swoppers[0] ]}\n${svgarray[ swoppers[1] ]}\n${
 		/*
 		 * keep all the rest of SVG document
 		 */

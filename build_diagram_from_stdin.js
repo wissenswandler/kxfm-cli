@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { build_diagram_from_string } from './build_diagram_from_string.js';
 
-export function build_diagram_from_stdin()
+export function build_diagram_from_stdin( libPath )
 {
 	console.warn(chalk.green("reading DOT source from stdin. Type CTRL-D to signal end of your input..."));
 
@@ -14,6 +14,6 @@ export function build_diagram_from_stdin()
 	);
 	process.stdin.on
 	(	'end',
-		() => console.log( build_diagram_from_string(stdin) )
+		() => console.log( build_diagram_from_string( stdin, libPath ) )
 	);
 }

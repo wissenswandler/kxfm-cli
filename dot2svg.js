@@ -23,6 +23,21 @@ if( process.argv.includes( "-w" ) )
 	process.argv.splice( process.argv.indexOf( "-w" ), 1 );
 }
 
+// test whether file ../lib/graph.js exists
+let libPath = "../lib";
+const testLib = libPath + "/graph.js";
+try
+{
+	fs.accessSync( testLib );
+	console.warn( chalk.green( `using local library ${testLib}` ) );
+}
+catch (err)
+{
+	libPath = "https://wissenswandler.github.io/lib";
+	console.warn( chalk.yellowBright( `library ${testLib} does not exist. Using default ${libPath}` ) );
+}
+
+
 /*
  * set dotsource_filename from command line argument or use default "graph.dot"
  */
@@ -67,7 +82,7 @@ if( ! Boolean( process.stdin.isTTY ) && process.argv.length === 2 )
 		console.warn( chalk.yellowBright ( `ignoring command line argument "${process.argv[2]}" because we are piped to.` ) )
 	}
 
-	build_diagram_from_stdin();
+	build_diagram_from_stdin( libPath );
 }
 else
 {
@@ -96,20 +111,20 @@ fs.stat( dotsource_filename, (err, source_stats) =>
 	{
 		if (err)
 		{
-	 		build_diagram_from_file( `initial build of missing ${svgproduct_filename} from ${dotsource_filename}`, dotsource_filename, svgproduct_filename )
-			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename );
+	 		build_diagram_from_file( `initial build of missing ${svgproduct_filename} from ${dotsource_filename}`, dotsource_filename, svgproduct_filename, libPath )
+			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath );
 		}
 		else
 		if (source_stats.mtime > product_stats.mtime)
 		{
-	 		build_diagram_from_file( `update build from ${dotsource_filename} which is newer than ${svgproduct_filename}`, dotsource_filename, svgproduct_filename )
+	 		build_diagram_from_file( `update build from ${dotsource_filename} which is newer than ${svgproduct_filename}`, dotsource_filename, svgproduct_filename, libPath  )
 			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename );
 		}
 		else
 		// both source and product exist and product is up to date
 		if( force_build )
 		{
-	 		build_diagram_from_file( `forcing build from ${dotsource_filename} which is older than ${svgproduct_filename}`, dotsource_filename, svgproduct_filename )
+	 		build_diagram_from_file( `forcing build from ${dotsource_filename} which is older than ${svgproduct_filename}`, dotsource_filename, svgproduct_filename, libPath )
 			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename );
 		}
 		else
@@ -121,14 +136,14 @@ fs.stat( dotsource_filename, (err, source_stats) =>
 })
 }
 
-function watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename )
+function watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath )
 {
 	console.warn( chalk.grey( `watching ${dotsource_filename} for changes...` ) )
 	fs.watchFile
 	(	dotsource_filename,
 		() =>
 		{
-			build_diagram_from_file(`\n${dotsource_filename} was touched,`, dotsource_filename, svgproduct_filename);
+			build_diagram_from_file(`\n${dotsource_filename} was touched,`, dotsource_filename, svgproduct_filename, libPath);
 		}
 	)
 }
