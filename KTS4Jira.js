@@ -28,16 +28,24 @@ static jiraIssueArray2dotString( issueArray, browsePath )
     /*
      * render edges
      */
-    issueArray.forEach(issue =>
-    {
-        const k = issue.key;
-        issue.fields.issuelinks.forEach(link => {
-            if (link.inwardIssue) {
-                tempString += "\n<" + k + "> -> <" + link.inwardIssue.key + ">";
+    issueArray.forEach
+    (   issue =>
+        {
+            const k = issue.key;
+            issue.fields.issuelinks.forEach
+            (   link => 
+                {
+                    if (link.inwardIssue)
+                    {
+                        tempString += "\n<" + k + "> -> <" + link.inwardIssue.key + ">";
+                    }
+                }
+            );
+            if( issue.fields.parent )
+            {
+                tempString += "\n<" + k + "> -> <" + issue.fields.parent.key + ">";
             }
         }
-        );
-    }
     );
     return tempString + "\n}";
 }
