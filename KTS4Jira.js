@@ -73,13 +73,15 @@ static renderHtmlLabel( issue )
                 .replace(/>/g, "&gt;" )
     };
 
-
-   //<IMG SRC="${issue.fields.issuetype.iconUrl}" />
-
+/*
+<IMG SRC="${issue.fields.issuetype.iconUrl}" />
+*/
     return `label=
 <<TABLE BORDER="0" CELLSPACING="0">
  <TR>
-  <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}"></TD>
+  <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}">
+  ${issue.fields.issuetype.name[0]}
+  </TD>
   <TD COLSPAN='3'><B>${escapeHtml( issue.fields.summary )}</B></TD>
  </TR>
  <TR>
