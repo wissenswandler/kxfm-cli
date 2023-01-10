@@ -58,7 +58,7 @@ jiraclient
 .searchJira
 (   jqlText, 
     {   maxResults: 1000,
-        fields : ['summary','description','issuetype','issuelinks','parent']
+        fields : ['summary','description','issuetype','issuelinks','parent','status']
     }
 )
 .then

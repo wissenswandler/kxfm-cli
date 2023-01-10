@@ -8,7 +8,36 @@ export default class KTS4Jira
 */
 static jiraIssueArray2dotString( issueArray, browsePath )
 {
-    let tempString = 'digraph { rankdir=BT node[shape=box, style="rounded,filled" fillcolor=white] ';
+    let tempString = `digraph Map {
+graph [color=whitesmoke,
+    fontname=Helvetica,
+    labelloc=b,
+    nodesep=0.2,
+    rankdir=BT,
+    ranksep=0.2,
+    remincross=true,
+    splines=true,
+    style="filled,rounded",
+    target=details,
+    tooltip=" "
+];
+node [fillcolor=white,
+    fontname=Helvetica,
+    height=0,
+    margin=0.1,
+    shape=box,
+    style="filled,rounded",
+    target=details,
+    tooltip=" ",
+    width=0
+];
+edge [arrowtail=none,
+    color=forestgreen,
+    dir=both,
+    fontsize=10,
+    penwidth=2,
+    target=details
+];`;
 
     /*
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
@@ -18,8 +47,11 @@ static jiraIssueArray2dotString( issueArray, browsePath )
         tempString += "\n" 
             + "# self: " + issue.self + "\n"
             + "<" + issue.key + ">"
-		    + " ["
-	   	    + this.renderAttributeIfExists( "label"   , issue.fields.summary     )
+		    + " [ "
+
+	   	    //+ this.renderAttributeIfExists( "label"   , issue.fields.summary     )
+            + this.renderHtmlLabel( issue )
+
             + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
 		    + this.renderURL( issue, browsePath )
 		    + " ]";
@@ -49,6 +81,37 @@ static jiraIssueArray2dotString( issueArray, browsePath )
     );
     return tempString + "\n}";
 }
+
+static renderHtmlLabel( issue )
+{
+    const typeSearchUrl = "https://knowhere.atlassian.net/issues/?jql=type=" + issue.fields.issuetype.id + "+ORDER+BY+summary";
+
+    // escape html special characters
+    // https://stackoverflow.com/questions/6234773/can-i-escape-html-special-chars-in-javascript
+    const escapeHtml = (unsafe) => {
+        return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;" )
+                .replace(/>/g, "&gt;" )
+    };
+
+
+   //<IMG SRC="${issue.fields.issuetype.iconUrl}" />
+
+    return `label=
+<<TABLE BORDER="0" CELLSPACING="0">
+ <TR>
+  <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}"></TD>
+  <TD COLSPAN='3'><B>${escapeHtml( issue.fields.summary )}</B></TD>
+ </TR>
+ <TR>
+  <TD HREF="${typeSearchUrl}" COLSPAN="2" SIDES="LBR" ALIGN="LEFT"><I><FONT POINT-SIZE='8'>${issue.fields.issuetype.name}</FONT></I></TD>
+  <TD><FONT POINT-SIZE='8'>${issue.fields.status.name}</FONT></TD>
+  <TD ALIGN='RIGHT'><FONT POINT-SIZE='8'>${issue.key}</FONT></TD>
+</TR>
+</TABLE>>`;
+}
+
 
 static renderURL( issue, browsePath = "https://knowhere.atlassian.net/browse" )
 {
