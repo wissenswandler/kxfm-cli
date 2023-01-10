@@ -15,7 +15,44 @@ await  graphviz.loadWASM();
 export function build_diagram_from_string( dot_string, libPath )
 {
 	const kts_dot_string = // insert text in dot_string after the first opening brace
-		dot_string.replace( /(graph.*\{)/ , '$1 node[id="\\N"] edge[id="\\T___\\H"] ');
+		dot_string.replace
+		(
+			/(graph.*\{)/
+			,
+			`$1
+graph [
+    color=whitesmoke
+    fontname=Helvetica
+    labelloc=b
+    rankdir=BT
+    remincross=true
+    splines=true
+    style="filled,rounded"
+    target=details
+    tooltip=" "
+]
+node [ id="\\N"
+    fillcolor=white
+    fontname=Helvetica
+    height=0
+    shape=box
+    style="filled,rounded"
+    target=details
+    tooltip=" "
+    width=0
+]
+edge [ id="\\T___\\H"
+    arrowtail=none
+    color=forestgreen
+    dir=both
+    fontsize=10
+    penwidth=2
+    target=details
+    tooltip=" "
+	 labeltooltip=" "
+	  headtooltip=" "     
+	  tailtooltip=" "
+]`		);
 	
 	let svg = null;
 

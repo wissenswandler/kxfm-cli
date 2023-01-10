@@ -9,35 +9,13 @@ export default class KTS4Jira
 static jiraIssueArray2dotString( issueArray, browsePath )
 {
     let tempString = `digraph Map {
-graph [color=whitesmoke,
-    fontname=Helvetica,
-    labelloc=b,
-    nodesep=0.2,
-    rankdir=BT,
-    ranksep=0.2,
-    remincross=true,
-    splines=true,
-    style="filled,rounded",
-    target=details,
-    tooltip=" "
-];
-node [fillcolor=white,
-    fontname=Helvetica,
-    height=0,
-    margin=0.1,
-    shape=box,
-    style="filled,rounded",
-    target=details,
-    tooltip=" ",
-    width=0
-];
-edge [arrowtail=none,
-    color=forestgreen,
-    dir=both,
-    fontsize=10,
-    penwidth=2,
-    target=details
-];`;
+graph [
+#   nodesep=0.2
+#   ranksep=0.2
+]
+node [
+#   margin=0.1
+]`;
 
     /*
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
