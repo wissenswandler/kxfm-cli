@@ -32,10 +32,8 @@ try
 catch (error)
 {
     console.warn( chalk.yellowBright(
-`No user file found at ${userFile} - using anonymous access instead.
-NOTE: this will only work for public information,
-such as browsing Jira projects or Jira issues with 'anonymous' access privilege granted.`
-));
+    `No user file found at ${userFile} - using anonymous access instead. NOTE: this will only work for public information.`
+    ));
 }
 
 /*

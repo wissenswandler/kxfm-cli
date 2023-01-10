@@ -10,6 +10,9 @@ export function rewrite_GraphViz_SVG_to_KTS_SVG( svg, libPath = "https://wissens
 		throw new Error( "SVG is not of String type" );
 	}
 
+	// insert helptext placeholder before closing </svg> tag
+	svg = svg.replace( /<\/svg>/ , '<foreignObject id="fo0" width="100%" height="100%" display="none"><div id="htmldiv" xmlns="http://www.w3.org/1999/xhtml" /></foreignObject></svg>' );
+
 	const svgarray = svg.split(/\r?\n/);
 
 	let swoppers = [8,9];

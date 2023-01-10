@@ -118,19 +118,19 @@ fs.stat( dotsource_filename, (err, source_stats) =>
 		if (source_stats.mtime > product_stats.mtime)
 		{
 	 		build_diagram_from_file( `update build from ${dotsource_filename} which is newer than ${svgproduct_filename}`, dotsource_filename, svgproduct_filename, libPath  )
-			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename );
+			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath );
 		}
 		else
 		// both source and product exist and product is up to date
 		if( force_build )
 		{
 	 		build_diagram_from_file( `forcing build from ${dotsource_filename} which is older than ${svgproduct_filename}`, dotsource_filename, svgproduct_filename, libPath )
-			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename );
+			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath );
 		}
 		else
 		{
 			console.warn( chalk.grey( `no need to build ${svgproduct_filename} now but let's watch for changes and build then (force build with parameter "-f")` ) )
-			watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename );
+			watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath );
 		}
 	})
 })
