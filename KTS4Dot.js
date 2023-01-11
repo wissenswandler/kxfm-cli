@@ -4,8 +4,16 @@
 
 export default class KTS4Dot
 {
+	static parseImageURLs(dot_string)
+	{
+		let regex = /IMG\s*SRC\s*=\s*"([^"]*)"/g;
+		return Array.from(dot_string.matchAll(regex)).map((match) => match[1]);
+	}
+
 	/*
 	 * add some required and some recommended attributes to the DOT string
+	 *
+	 * also scan for image urls and return them in an array
 	 */
 	static preprocess(dot_string)
 	{
