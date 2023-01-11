@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { build_diagram_from_string } from './build_diagram_from_string.js';
+import KTS4dot2svg from './KTS4dot2svg.js';
 
 export function build_diagram_from_stdin( libPath )
 {
@@ -14,6 +14,6 @@ export function build_diagram_from_stdin( libPath )
 	);
 	process.stdin.on
 	(	'end',
-		() => console.log( build_diagram_from_string( stdin, libPath ) )
+		() => console.log( KTS4dot2svg.build_diagram_from_string( stdin, libPath ) )
 	);
 }

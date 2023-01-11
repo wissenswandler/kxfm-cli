@@ -8,9 +8,9 @@
  results could be piped to jiraIssueArray2dotString.js in order to create a GraphViz DOT file
  */
 
-import jiraAPI from 'jira-client'
 import chalk from 'chalk';
 import JiraExtract from './JiraExtract.js';
+import JiraInterface from './JiraInterface.js';
 
 // read Jira Cloud instance name from first command line argument, **/DIR, or use default
 let jiraCloudInstance = null;
@@ -65,20 +65,6 @@ catch (error)
     ));
 }
 
-/*
- * NOTE: apiVersion 'latest' seems to be interpreted as '2', at least in case of /search operation!
- * 2/search returns multi-line text fields (such as description) of type String, whereas
- * 3/search and latest/search return multi-line text fields of ADO type JSON object (see comment below)
- */
-var jiraclient = new jiraAPI({
-    protocol: 'https',
-    host: jiraCloudInstance + '.atlassian.net',
-    username    : atlassianUser,
-    password    : atlassianPassword,
-    apiVersion: '2', // see NOTE above
-    strictSSL: true
-});
-
 
 // read jqlText from second command line argument or construct from DIR name
 const arg2 = process.argv[3];
@@ -89,14 +75,9 @@ if( !jqlText )
     console.warn( chalk.grey( `assuming query text "${jqlText}" from DIR (supply complete query as 2. parameter if needed)` ) )
 }
 
-
-jiraclient
-.searchJira
-(   jqlText, 
-    {   maxResults: 1000,
-        fields : ['summary','description','issuetype','issuelinks','parent','status']
-    }
-)
+let
+jirainterface = new JiraInterface( jiraCloudInstance, atlassianUser, atlassianPassword, '2' );
+jirainterface.search (  jqlText, ['summary','description','issuetype','issuelinks','parent','status']  )
 .then
 (   searchResult =>
 {

@@ -1,5 +1,12 @@
+/*
+ * lightweight KTS lib (no dependencies)
+ */
+
 export default class KTS4Jira
 {
+
+// standard image size to be used for both dimensions
+static IMAGE_SIZE = 32;
 
 /*
 * convert Jira issue array to DOT string
@@ -17,6 +24,8 @@ node [
 #   margin=0.1
 ]`;
 
+    let images = [];
+
     /*
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
      */
@@ -33,8 +42,15 @@ node [
             + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
 		    + this.renderURL( issue, browsePath )
 		    + " ]";
+
+        // adding issue.fields.issuetype.iconUrl to images array if not already present
+        if( issue.fields.issuetype.iconUrl && !images.includes( issue.fields.issuetype.iconUrl ) )
+        {
+            images.push( issue.fields.issuetype.iconUrl );
+        }
     }
     );
+
     /*
      * render edges
      */
@@ -57,7 +73,16 @@ node [
             }
         }
     );
+
+    console.warn( `${images.length} images: \n${ JSON.stringify( this.wasmArray(images.sort()) ) }` );
+
     return tempString + "\n}";
+}
+
+static wasmArray( imageArray )
+{
+    // create an array with entries of form { path:"", width:"16px", height:"16px" } for every entry of input array [Copilot]
+    return imageArray.map( image => ({ path: image, width: ""+this.IMAGE_SIZE+"px", height: ""+this.IMAGE_SIZE+"16px" }) );
 }
 
 static renderHtmlLabel( issue )
@@ -74,14 +99,13 @@ static renderHtmlLabel( issue )
     };
 
 /*
-<IMG SRC="${issue.fields.issuetype.iconUrl}" />
-*/
+ * NOTE: keeping the IMG tag in one line with TD tag is important, otherwise the IMG tag will be ignored!!
+ * see https://github.com/hpcc-systems/hpcc-js-wasm/issues/145
+ */
     return `label=
 <<TABLE BORDER="0" CELLSPACING="0">
  <TR>
-  <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}">
-  ${issue.fields.issuetype.name[0]}
-  </TD>
+  <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}"><IMG SRC="${issue.fields.issuetype.iconUrl}" /></TD>
   <TD COLSPAN='3'><B>${escapeHtml( issue.fields.summary )}</B></TD>
  </TR>
  <TR>
@@ -91,7 +115,6 @@ static renderHtmlLabel( issue )
 </TR>
 </TABLE>>`;
 }
-
 
 static renderURL( issue, browsePath = "https://knowhere.atlassian.net/browse" )
 {

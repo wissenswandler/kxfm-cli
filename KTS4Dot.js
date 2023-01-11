@@ -1,3 +1,7 @@
+/*
+ * lightweight KTS lib (no dependencies)
+ */
+
 export default class KTS4Dot
 {
 	/*

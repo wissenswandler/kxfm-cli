@@ -1,10 +1,17 @@
+/*
+ * still heavyweight and implementation-dependent
+ * TODO: refactor into interface + different implementations in separate packages
+ */
+
 import chalk from 'chalk';
-import KTS4GraphViz from './KTS4GraphViz.js';
+import KTS4SVG from './KTS4SVG.js';
 import KTS4Dot from './KTS4Dot.js';
 
 import graphviz from 'graphviz-wasm';
 await  graphviz.loadWASM();
 
+export default class KTS4dot2svg
+{
 /*
  * build diagram from DOT source string
  *
@@ -13,7 +20,7 @@ await  graphviz.loadWASM();
  * 
  * the resulting SVG is extended with KTS specific CSS and Javascript, to be used as a stand-alone SVG in a browser
  */
-export function build_diagram_from_string( dot_string, libPath )
+static build_diagram_from_string( dot_string, libPath )
 {
 	let svg = null;
 	try
@@ -28,6 +35,7 @@ export function build_diagram_from_string( dot_string, libPath )
 				<text x="50" y="50" text-anchor="middle" alignment-baseline="middle" font-size="0.1em" fill="darkred">error in DOT source: ${e.message}</text>
 				</svg>`;
 	}
-	svg = KTS4GraphViz.rewrite_GraphViz_SVG_to_KTS_SVG( svg, libPath );
+	svg = KTS4SVG.rewrite_GraphViz_SVG_to_KTS_SVG( svg, libPath );
 	return svg;
+}
 }

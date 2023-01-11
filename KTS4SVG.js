@@ -1,4 +1,8 @@
-export default class KTS4GraphViz
+/*
+ * lightweight KTS lib (no dependencies)
+ */
+
+export default class KTS4SVG
 {
 	/*
 	* rewrite GraphViz SVG to include KTS CSS and Javascript,

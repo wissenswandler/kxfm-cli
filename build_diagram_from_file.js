@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import fs from 'fs';
-import { build_diagram_from_string } from './build_diagram_from_string.js';
+import KTS4dot2svg from './KTS4dot2svg.js';
 
 /*
  * build diagram from DOT source file
@@ -18,7 +18,7 @@ export function build_diagram_from_file( log_comment, dotsource_filename, svgpro
 			return console.error(chalk.red(err));
 		}
 
-		const svg_kts = build_diagram_from_string( data, libPath );
+		const svg_kts = KTS4dot2svg.build_diagram_from_string( data, libPath );
 
 		fs.writeFile( svgproduct_filename, svg_kts, err => {
 			if (err) {
