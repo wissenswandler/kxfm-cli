@@ -2,11 +2,10 @@
  * lightweight KTS lib (no dependencies)
  */
 
+import KTS4SVG from "./KTS4SVG.js";
+
 export default class KTS4Jira
 {
-
-// standard image size to be used for both dimensions
-static IMAGE_SIZE = 32;
 
 /*
 * convert Jira issue array to DOT string
@@ -24,8 +23,6 @@ node [
 #   margin=0.1
 ]`;
 
-    let images = [];
-
     /*
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
      */
@@ -35,19 +32,10 @@ node [
             + "# self: " + issue.self + "\n"
             + "<" + issue.key + ">"
 		    + " [ "
-
-	   	    //+ this.renderAttributeIfExists( "label"   , issue.fields.summary     )
             + this.renderHtmlLabel( issue )
-
             + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
 		    + this.renderURL( issue, browsePath )
 		    + " ]";
-
-        // adding issue.fields.issuetype.iconUrl to images array if not already present
-        if( issue.fields.issuetype.iconUrl && !images.includes( issue.fields.issuetype.iconUrl ) )
-        {
-            images.push( issue.fields.issuetype.iconUrl );
-        }
     }
     );
 
@@ -74,29 +62,12 @@ node [
         }
     );
 
-    console.warn( `${images.length} images: \n${ JSON.stringify( this.wasmArray(images.sort()) ) }` );
-
     return tempString + "\n}";
-}
-
-static wasmArray( imageArray )
-{
-    // create an array with entries of form { path:"", width:"16px", height:"16px" } for every entry of input array [Copilot]
-    return imageArray.map( image => ({ path: image, width: ""+this.IMAGE_SIZE+"px", height: ""+this.IMAGE_SIZE+"16px" }) );
 }
 
 static renderHtmlLabel( issue )
 {
     const typeSearchUrl = "https://knowhere.atlassian.net/issues/?jql=type=" + issue.fields.issuetype.id + "+ORDER+BY+summary";
-
-    // escape html special characters
-    // https://stackoverflow.com/questions/6234773/can-i-escape-html-special-chars-in-javascript
-    const escapeHtml = (unsafe) => {
-        return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;" )
-                .replace(/>/g, "&gt;" )
-    };
 
 /*
  * NOTE: keeping the IMG tag in one line with TD tag is important, otherwise the IMG tag will be ignored!!
@@ -106,7 +77,7 @@ static renderHtmlLabel( issue )
 <<TABLE BORDER="0" CELLSPACING="0">
  <TR>
   <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}"><IMG SRC="${issue.fields.issuetype.iconUrl}" /></TD>
-  <TD COLSPAN='3'><B>${escapeHtml( issue.fields.summary )}</B></TD>
+  <TD COLSPAN='3'><B>${KTS4SVG.escapeHtml( issue.fields.summary )}</B></TD>
  </TR>
  <TR>
   <TD HREF="${typeSearchUrl}" COLSPAN="2" SIDES="LBR" ALIGN="LEFT"><I><FONT POINT-SIZE='8'>${issue.fields.issuetype.name}</FONT></I></TD>

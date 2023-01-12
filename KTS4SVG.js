@@ -57,4 +57,16 @@ export default class KTS4SVG
 			svgarray.slice(10).join("\n")
 		}`;
 	}
+
+    // escape html special characters
+    // https://stackoverflow.com/questions/6234773/can-i-escape-html-special-chars-in-javascript
+	static escapeHtml(unsafe)
+	{
+		return unsafe
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+	}	
 }
