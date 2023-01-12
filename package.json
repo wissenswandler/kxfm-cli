@@ -6,7 +6,7 @@
     "jira-client": "^8.2.2"
   },
   "name": "kts-node",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Knowledge Transformation System (KTS) implementation in node.js",
   "main": "dot2svg.js",
   "scripts": {
