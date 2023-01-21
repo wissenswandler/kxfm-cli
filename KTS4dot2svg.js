@@ -31,10 +31,13 @@ build_diagram_from_string( dot_string, libPath )
 
 	let kts_dot = KTS4Dot.preprocess(dot_string);
 
+	let unflat_dot = graphviz.unflatten( kts_dot, 5, true, 5);
+	console.warn( "unflat dot:\n" + unflat_dot );
+
 	let svg = null;
 	try
 	{
-		svg = graphviz.dot( kts_dot, "svg", { images: imageAttributeArray } );
+		svg = graphviz.dot( unflat_dot, "svg", { images: imageAttributeArray } );
 	}
 	catch (e)
 	{
