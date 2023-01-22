@@ -4,8 +4,48 @@
 
 import KTS4SVG from "./KTS4SVG.js";
 
+/*
+ * a Set of unqiue, detailed Jira issues
+ * where an issue with more details (fields) is preferred over a less detailed one
+ */
+class JiraIssueSet extends Set
+{
+  add (o) 
+  {
+    this.forEach
+    (   i =>
+        {
+            if (this.deepCompare(o, i))
+                throw( "refusing: " + o.key );
+        }
+    );
+    // log the length of the o.fields object
+    // console.log( o.key + ": " + Object.keys(o.fields).length );
+    console.warn( "adding: " + o.key + " with " + Object.keys(o.fields).length + " fields" );
+    super.add.call(this, o);
+    return this;
+  };
+
+  deepCompare(o, i)
+  {
+    return o.key == i.key && Object.keys(o.fields).length <= Object.keys(i.fields).length;
+  }
+}
+
 export default class KTS4Jira
 {
+
+static safeAdd( set, o )
+{
+    try
+    {
+        set.add( o );
+    }
+    catch( e )
+    {
+        console.warn( e );
+    }
+}
 
 /*
 * convert Jira issue array to DOT string
@@ -13,6 +53,45 @@ export default class KTS4Jira
 * @returns {String} - DOT string
 */
 static jiraIssueArray2dotString( issueArray, browsePath )
+{
+    //put all issues from array into a unique set
+    const issueSet = new JiraIssueSet( issueArray );
+
+    // add all issues from issuelinks to the set
+    issueArray.forEach
+    (   issue =>
+        {
+            if( issue.fields.parent )
+                this.safeAdd( issueSet, issue.fields.parent );
+
+            if( issue.fields.issuelinks )
+            {
+                issue.fields.issuelinks.forEach
+                (   link =>
+                    {
+                        if( link.outwardIssue )
+                        {
+                            this.safeAdd( issueSet, link.outwardIssue );
+                        }
+                        if( link.inwardIssue )
+                        {
+                            this.safeAdd( issueSet, link.inwardIssue );
+                        }
+                    }
+                );
+            }
+        }
+    );
+
+    console.warn("issueSet.size: " + issueSet.size);
+
+    return this.jiraGraph2dotString( { nodes: issueSet }, browsePath );
+}
+
+/*
+ * a Jira Graph is a set of Nodes and a set of Edges, both in Jira API shape
+ */
+static jiraGraph2dotString( jiraGraph, browsePath )
 {
     let tempString = `digraph Map {
 graph [
@@ -26,26 +105,28 @@ node [
     /*
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
      */
-    issueArray.forEach(issue =>
-    {
-        tempString += "\n" 
-            + "# self: " + issue.self + "\n"
-            + "<" + issue.key + ">"
-		    + " [ "
-            + this.renderHtmlLabel( issue )
-            + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
-		    + this.renderURL( issue, browsePath )
-		    + " ]";
-    }
+    jiraGraph.nodes.forEach
+    (   issue =>
+        {
+            tempString += "\n" 
+                + "# self: " + issue.self + "\n"
+                + "<" + issue.key + ">"
+                + " [ "
+                + this.renderHtmlLabel( issue )
+                + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
+                + this.renderURL( issue, browsePath )
+                + " ]";
+        }
     );
 
     /*
      * render edges
      */
-    issueArray.forEach
+    jiraGraph.nodes.forEach
     (   issue =>
         {
             const k = issue.key;
+            if( issue.fields.issuelinks )
             issue.fields.issuelinks.forEach
             (   link => 
                 {
@@ -131,7 +212,6 @@ static safeAttribute( text )
     if( typeof text === "object" )
     {
         /* this could be an Atlassian Document Object (ADO) e.g. like that:
-        */
         const ado =
         {
             "version":1,
@@ -150,6 +230,7 @@ static safeAttribute( text )
                 }
             ]
         };
+        */
         console.warn( "found a text OBJECT (that is not null) and don't know how to handle that, returning empty string: " + JSON.stringify( text ) );
         return "";
     }

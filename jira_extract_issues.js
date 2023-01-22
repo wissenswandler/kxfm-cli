@@ -71,7 +71,8 @@ const arg2 = process.argv[3];
 let jqlText = arg2;
 if( !jqlText )
 {
-    jqlText = `project=${process.cwd().split( path.sep ).pop()}`;
+    let cwd = process.cwd().split( path.sep ).pop();
+    jqlText = `project=${cwd} OR labels=view--${cwd}`;
     console.warn( chalk.grey( `assuming query text "${jqlText}" from DIR (supply complete query as 2. parameter if needed)` ) )
 }
 
@@ -82,6 +83,7 @@ jirainterface.search (  jqlText, ['summary','description','issuetype','issuelink
 (   searchResult =>
 {
     console.log( JSON.stringify( searchResult.issues )  )
+    console.warn( chalk.grey( `done extracting ${searchResult.issues.length} issues` ) )
 }
 )
 .catch
