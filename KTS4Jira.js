@@ -19,16 +19,39 @@ class JiraIssueSet extends Set
                 throw( "refusing: " + o.key );
         }
     );
-    // log the length of the o.fields object
-    // console.log( o.key + ": " + Object.keys(o.fields).length );
-    console.warn( "adding: " + o.key + " with " + Object.keys(o.fields).length + " fields" );
+    // log the length of the o.fields object [Copilot]
+    //console.warn( "adding: " + o.key + " with " + Object.keys(o.fields).length + " fields" );
+
+    // test whether o.key contains the text "META" [Copilot]
+    let meta = o.key.includes("META");
+    let base_dot_style = meta ? "filled" : "filled,rounded";
+    switch( o.fields.status.statusCategory.id )
+    {
+        case 3:
+            o.dot_style = base_dot_style + ",dashed";
+            break;
+        case 2:
+            o.dot_style = base_dot_style + ",dotted";
+            break;
+        case 1: // never seen in the wild, so mark it bold to stand out visually
+            o.dot_style = base_dot_style + ",bold";
+            break;
+        default: // in particular == 4
+            o.dot_style = base_dot_style;
+    }
+
     super.add.call(this, o);
     return this;
   };
 
   deepCompare(o, i)
   {
-    return o.key == i.key && Object.keys(o.fields).length <= Object.keys(i.fields).length;
+    // TODO: theoretically handle the case of replacing an issue with less details with one with more details
+    // assuming that 'issues' are harvested first, then linked issues, we always receive the more detailed issue first
+    // so, practically we will never have to deal with such replacement
+    //return o.key == i.key && Object.keys(o.fields).length <= Object.keys(i.fields).length;
+
+    return o.key == i.key
   }
 }
 
@@ -43,7 +66,7 @@ static safeAdd( set, o )
     }
     catch( e )
     {
-        console.warn( e );
+        //console.warn( e );
     }
 }
 
@@ -54,10 +77,10 @@ static safeAdd( set, o )
 */
 static jiraIssueArray2dotString( issueArray, browsePath )
 {
-    //put all issues from array into a unique set
+    //put all issues from array into a unique set [Copilot]
     const issueSet = new JiraIssueSet( issueArray );
 
-    // add all issues from issuelinks to the set
+    // add all issues from issuelinks to the set [mostly Copilot]
     issueArray.forEach
     (   issue =>
         {
@@ -115,6 +138,7 @@ node [
                 + this.renderHtmlLabel( issue )
                 + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
                 + this.renderURL( issue, browsePath )
+                + this.renderAttributeIfExists( "style" , issue.dot_style ) // [Copilot !!]
                 + " ]";
         }
     );
@@ -129,9 +153,14 @@ node [
             if( issue.fields.issuelinks )
             issue.fields.issuelinks.forEach
             (   link => 
+                // TODO: reverse "type 2" links
+                // TODO: handle outward links via unique set of links
                 {
                     if (link.inwardIssue)
                     {
+                        // note that traditional Jira semantics are in "dependency" direction,
+                        // which is the opposite of "value" direction,
+                        // so it appears that we reverse the direction of the edge
                         tempString += "\n<" + k + "> -> <" + link.inwardIssue.key + ">";
                     }
                 }
@@ -155,17 +184,14 @@ static renderHtmlLabel( issue )
  * see https://github.com/hpcc-systems/hpcc-js-wasm/issues/145
  */
     return `label=
-<<TABLE BORDER="0" CELLSPACING="0">
- <TR>
+<<TABLE BORDER="0" CELLSPACING="0"> <TR>
   <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}"><IMG SRC="${issue.fields.issuetype.iconUrl}" /></TD>
   <TD COLSPAN='3'><B>${KTS4SVG.escapeHtml( issue.fields.summary )}</B></TD>
- </TR>
- <TR>
+ </TR> <TR>
   <TD HREF="${typeSearchUrl}" COLSPAN="2" SIDES="LBR" ALIGN="LEFT"><I><FONT POINT-SIZE='8'>${issue.fields.issuetype.name}</FONT></I></TD>
   <TD><FONT POINT-SIZE='8'>${issue.fields.status.name}</FONT></TD>
   <TD ALIGN='RIGHT'><FONT POINT-SIZE='8'>${issue.key}</FONT></TD>
-</TR>
-</TABLE>>`;
+</TR> </TABLE>>`;
 }
 
 static renderURL( issue, browsePath = "https://knowhere.atlassian.net/browse" )
