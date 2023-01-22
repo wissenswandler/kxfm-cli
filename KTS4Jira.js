@@ -5,23 +5,62 @@
 import KTS4SVG from "./KTS4SVG.js";
 
 /*
- * a Set of unqiue, detailed Jira issues
- * where an issue with more details (fields) is preferred over a less detailed one
+ * a Set of unqiue objects
+ * where identity is defined by the unique_by property
  */
-class JiraIssueSet extends Set
+class UniqueSet extends Set
 {
+  static get unqiue_by() { return "id"; }
+
   add (o) 
   {
     this.forEach
     (   i =>
         {
             if (this.deepCompare(o, i))
-                throw( "refusing: " + o.key );
+                throw( "refusing: " + o[ UniqueSet.unqiue_by ] );
         }
     );
     // log the length of the o.fields object [Copilot]
     //console.warn( "adding: " + o.key + " with " + Object.keys(o.fields).length + " fields" );
 
+    this.decorate( o );
+
+    super.add.call(this, o);
+    return this;
+  };
+
+  deepCompare(o, i)
+  {
+    // TODO: theoretically handle the case of replacing an issue with less details with one with more details
+    // assuming that 'issues' are harvested first, then linked issues, we always receive the more detailed issue first
+    // so, practically we will never have to deal with such replacement
+    //return o.key == i.key && Object.keys(o.fields).length <= Object.keys(i.fields).length;
+
+    return o[ UniqueSet.unqiue_by ] == i[ UniqueSet.unqiue_by ]
+  }
+  
+  /*
+   * optionally modify o
+   * after it has been accepted,
+   * but before it is added to the set
+   */
+  decorate( o )
+  {
+    // not implemented in base class
+  }
+}
+/*
+ * a Set of unqiue, detailed Jira issues
+ * where an issue with more details (fields) is preferred over a less detailed one
+ */
+class JiraIssueSet extends UniqueSet
+{
+  /*
+   * decoreate the issue with a style
+   */
+  decorate( o )
+  {
     // test whether o.key contains the text "META" [Copilot]
     let meta = o.key.includes("META");
     let base_dot_style = meta ? "filled" : "filled,rounded";
@@ -39,20 +78,12 @@ class JiraIssueSet extends Set
         default: // in particular == 4
             o.dot_style = base_dot_style;
     }
-
-    super.add.call(this, o);
-    return this;
-  };
-
-  deepCompare(o, i)
-  {
-    // TODO: theoretically handle the case of replacing an issue with less details with one with more details
-    // assuming that 'issues' are harvested first, then linked issues, we always receive the more detailed issue first
-    // so, practically we will never have to deal with such replacement
-    //return o.key == i.key && Object.keys(o.fields).length <= Object.keys(i.fields).length;
-
-    return o.key == i.key
   }
+}
+
+class JiraIssueLinkSet extends UniqueSet
+{
+
 }
 
 export default class KTS4Jira
@@ -79,8 +110,10 @@ static jiraIssueArray2dotString( issueArray, browsePath )
 {
     //put all issues from array into a unique set [Copilot]
     const issueSet = new JiraIssueSet( issueArray );
+    const linkSet  = new JiraIssueLinkSet();   
 
     // add all issues from issuelinks to the set [mostly Copilot]
+    // and add all links to the link set
     issueArray.forEach
     (   issue =>
         {
@@ -91,14 +124,29 @@ static jiraIssueArray2dotString( issueArray, browsePath )
             {
                 issue.fields.issuelinks.forEach
                 (   link =>
+                    // TODO: reverse "type 2" links
+                        
+                    // note that traditional Jira semantics are in "dependency" direction,
+                    // which is the opposite of "value" direction,
+                    // so it appears that we reverse the direction of the edge by drawing it from the outwardIssue to the inwardIssue
                     {
                         if( link.outwardIssue )
                         {
                             this.safeAdd( issueSet, link.outwardIssue );
+
+                            link.o_key = issue.key;
+                            link.s_key = link.outwardIssue.key;
+                            delete link.outwardIssue;
+                            this.safeAdd( linkSet, link );
                         }
                         if( link.inwardIssue )
                         {
                             this.safeAdd( issueSet, link.inwardIssue );
+
+                            link.s_key = issue.key;
+                            link.o_key = link.inwardIssue.key;
+                            delete link.inwardIssue;
+                            this.safeAdd( linkSet, link );
                         }
                     }
                 );
@@ -108,7 +156,7 @@ static jiraIssueArray2dotString( issueArray, browsePath )
 
     console.warn("issueSet.size: " + issueSet.size);
 
-    return this.jiraGraph2dotString( { nodes: issueSet }, browsePath );
+    return this.jiraGraph2dotString( { nodes: issueSet, edges: linkSet }, browsePath );
 }
 
 /*
@@ -131,6 +179,9 @@ node [
     jiraGraph.nodes.forEach
     (   issue =>
         {
+            //
+            // node definition
+            //
             tempString += "\n" 
                 + "# self: " + issue.self + "\n"
                 + "<" + issue.key + ">"
@@ -140,35 +191,24 @@ node [
                 + this.renderURL( issue, browsePath )
                 + this.renderAttributeIfExists( "style" , issue.dot_style ) // [Copilot !!]
                 + " ]";
+
+            //
+            // optional 'parent' edge
+            //
+            if( issue.fields.parent )
+            {
+                tempString += "\n<" + issue.key + "> -> <" + issue.fields.parent.key + ">";
+            }
         }
     );
 
     /*
      * render edges
      */
-    jiraGraph.nodes.forEach
-    (   issue =>
+    jiraGraph.edges.forEach
+    (   link =>
         {
-            const k = issue.key;
-            if( issue.fields.issuelinks )
-            issue.fields.issuelinks.forEach
-            (   link => 
-                // TODO: reverse "type 2" links
-                // TODO: handle outward links via unique set of links
-                {
-                    if (link.inwardIssue)
-                    {
-                        // note that traditional Jira semantics are in "dependency" direction,
-                        // which is the opposite of "value" direction,
-                        // so it appears that we reverse the direction of the edge
-                        tempString += "\n<" + k + "> -> <" + link.inwardIssue.key + ">";
-                    }
-                }
-            );
-            if( issue.fields.parent )
-            {
-                tempString += "\n<" + k + "> -> <" + issue.fields.parent.key + ">";
-            }
+            tempString += "\n<" + link.s_key + "> -> <" + link.o_key + ">";
         }
     );
 
