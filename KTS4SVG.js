@@ -19,6 +19,9 @@ export default class KTS4SVG
 		// insert helptext placeholder before closing </svg> tag
 		svg = svg.replace( /<\/svg>/ , '<foreignObject id="fo0" width="100%" height="100%" display="none"><div id="htmldiv" xmlns="http://www.w3.org/1999/xhtml" /></foreignObject></svg>' );
 
+		// remove width and height attributes from <svg> tag as it causes unpredictable scaling (something like 50% larger than expected)
+		svg = svg.replace( /<svg( (width|height)="\d+pt"){0,2}/g, '<svg' )
+
 		const svgarray = svg.split(/\r?\n/);
 
 		let swoppers = [8,9];

@@ -10,7 +10,7 @@ import { Graphviz } from "@hpcc-js/wasm/graphviz";
 const graphviz = await Graphviz.load();
 
 // standard image size to be used for both dimensions
-export const IMAGE_SIZE = 32;
+export const IMAGE_SIZE = 16;
 
 export default 
 {

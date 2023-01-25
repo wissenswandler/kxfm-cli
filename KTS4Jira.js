@@ -154,7 +154,7 @@ static jiraIssueArray2dotString( issueArray, browsePath )
         }
     );
 
-    console.warn("issueSet.size: " + issueSet.size);
+    //console.warn("issueSet.size: " + issueSet.size);
 
     return this.jiraGraph2dotString( { nodes: issueSet, edges: linkSet }, browsePath );
 }
@@ -225,8 +225,8 @@ static renderHtmlLabel( issue )
  */
     return `label=
 <<TABLE BORDER="0" CELLSPACING="0"> <TR>
-  <TD WIDTH="18" HEIGHT="18" FIXEDSIZE="TRUE" CELLPADDING="0" VALIGN="TOP" HREF="${typeSearchUrl}"><IMG SRC="${issue.fields.issuetype.iconUrl}" /></TD>
-  <TD COLSPAN='3'><B>${KTS4SVG.escapeHtml( issue.fields.summary )}</B></TD>
+  <TD CELLPADDING="0" HREF="${typeSearchUrl}"><IMG SRC="${issue.fields.issuetype.iconUrl}" /></TD>
+  <TD COLSPAN='3'>${KTS4SVG.escapeHtml( issue.fields.summary )}</TD>
  </TR> <TR>
   <TD HREF="${typeSearchUrl}" COLSPAN="2" SIDES="LBR" ALIGN="LEFT"><I><FONT POINT-SIZE='8'>${issue.fields.issuetype.name}</FONT></I></TD>
   <TD><FONT POINT-SIZE='8'>${issue.fields.status.name}</FONT></TD>
