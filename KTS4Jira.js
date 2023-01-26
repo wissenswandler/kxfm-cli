@@ -166,11 +166,12 @@ static jiraGraph2dotString( jiraGraph, browsePath )
 {
     let tempString = `digraph Map {
 graph [
+    class="kts-generated"
 #   nodesep=0.2
 #   ranksep=0.2
 ]
 node [
-#   margin=0.1
+   margin=0.1
 ]`;
 
     /*
