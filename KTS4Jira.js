@@ -63,6 +63,8 @@ class JiraIssueSet extends UniqueSet
   {
     // test whether o.key contains the text "META" [Copilot]
     let meta = o.key.includes("META");
+    o.isMeta = meta;
+
     let base_dot_style = meta ? "filled" : "filled,rounded";
     switch( o.fields.status.statusCategory.id )
     {
@@ -106,7 +108,7 @@ static safeAdd( set, o )
 * @param {Array} issueArray - array of Jira issues
 * @returns {String} - DOT string
 */
-static jiraIssueArray2dotString( issueArray, browsePath )
+static jiraIssueArray2dotString( issueArray, jiraInstance )
 {
     //put all issues from array into a unique set [Copilot]
     const issueSet = new JiraIssueSet( issueArray );
@@ -156,13 +158,13 @@ static jiraIssueArray2dotString( issueArray, browsePath )
 
     //console.warn("issueSet.size: " + issueSet.size);
 
-    return this.jiraGraph2dotString( { nodes: issueSet, edges: linkSet }, browsePath );
+    return this.jiraGraph2dotString( { nodes: issueSet, edges: linkSet }, jiraInstance );
 }
 
 /*
  * a Jira Graph is a set of Nodes and a set of Edges, both in Jira API shape
  */
-static jiraGraph2dotString( jiraGraph, browsePath )
+static jiraGraph2dotString( jiraGraph, jiraInstance )
 {
     let tempString = `digraph Map {
 graph [
@@ -183,13 +185,13 @@ node [
             //
             // node definition
             //
-            tempString += "\n" 
+            tempString += "\n\n" 
                 + "# self: " + issue.self + "\n"
                 + "<" + issue.key + ">"
                 + " [ "
-                + this.renderHtmlLabel( issue )
+                + this.renderHtmlLabel( issue, jiraInstance )
                 + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
-                + this.renderURL( issue, browsePath )
+                + this.renderURL( issue, jiraInstance )
                 + this.renderAttributeIfExists( "style" , issue.dot_style ) // [Copilot !!]
                 + " ]";
 
@@ -216,9 +218,14 @@ node [
     return tempString + "\n}";
 }
 
-static renderHtmlLabel( issue )
+static renderHtmlLabel( issue, jiraInstance )
 {
-    const typeSearchUrl = "https://knowhere.atlassian.net/issues/?jql=type=" + issue.fields.issuetype.id + "+ORDER+BY+summary";
+    let typeSearchAttribute = "";
+    if( issue.isMeta )
+    {
+        const typeSearchUrl = "https://" + this.jiraInstanceFromIssueOrParameter(issue,jiraInstance) + "/issues/?jql=type=" + issue.fields.issuetype.id + "+ORDER+BY+summary";
+        typeSearchAttribute = ` HREF="${typeSearchUrl}"`;
+    }
 
 /*
  * NOTE: keeping the IMG tag in one line with TD tag is important, otherwise the IMG tag will be ignored!!
@@ -226,18 +233,37 @@ static renderHtmlLabel( issue )
  */
     return `label=
 <<TABLE BORDER="0" CELLSPACING="0"> <TR>
-  <TD CELLPADDING="0" HREF="${typeSearchUrl}"><IMG SRC="${issue.fields.issuetype.iconUrl}" /></TD>
+  <TD CELLPADDING="0"${typeSearchAttribute}><IMG SRC="${issue.fields.issuetype.iconUrl}" /></TD>
   <TD COLSPAN='3'>${KTS4SVG.escapeHtml( issue.fields.summary )}</TD>
  </TR> <TR>
-  <TD HREF="${typeSearchUrl}" COLSPAN="2" SIDES="LBR" ALIGN="LEFT"><I><FONT POINT-SIZE='8'>${issue.fields.issuetype.name}</FONT></I></TD>
+  <TD${typeSearchAttribute} COLSPAN="2" SIDES="LBR" ALIGN="LEFT"><I><FONT POINT-SIZE='8'>${issue.fields.issuetype.name}</FONT></I></TD>
   <TD><FONT POINT-SIZE='8'>${issue.fields.status.name}</FONT></TD>
   <TD ALIGN='RIGHT'><FONT POINT-SIZE='8'>${issue.key}</FONT></TD>
 </TR> </TABLE>>`;
 }
 
-static renderURL( issue, browsePath = "https://knowhere.atlassian.net/browse" )
+static jiraInstanceFromIssueOrParameter( issue, jiraInstance )
 {
-    const cloudInstanceMatcheR = /https:\/\/(.+)\.atlassian\.net\//g;
+    return this.jiraInstanceFromIssue( issue ) || jiraInstance;
+}
+static jiraInstanceFromIssue( issue )
+{
+    const cloudInstanceMatcheR = /https:\/\/(\w+\.atlassian\.net)\//g;
+    const cloudInstanceMatcheS = [ ...issue.self.matchAll( cloudInstanceMatcheR ) ];
+
+    if( cloudInstanceMatcheS && cloudInstanceMatcheS[0] )
+    {
+        return cloudInstanceMatcheS[0][1];
+    }
+    else
+        return null;
+}
+
+static renderURL( issue, jiraInstance )
+{
+    let browsePath;
+
+    const cloudInstanceMatcheR = /https:\/\/\w+\.atlassian\.net\//g;
     const cloudInstanceMatcheS = [ ...issue.self.matchAll( cloudInstanceMatcheR ) ];
 
     if( cloudInstanceMatcheS && cloudInstanceMatcheS[0] )
@@ -246,12 +272,20 @@ static renderURL( issue, browsePath = "https://knowhere.atlassian.net/browse" )
     }
     else
     {
+        if( !jiraInstance )
+        {  
+            jiraInstance = "knowhere.atlassian.net";
+            console.warn( "could not extract instance name from issue.self: " + issue.self );
+            console.warn( "and no instance name supplied via parameter" );
+            console.warn( "using default instance name FOR TESTING PURPOSES: " + jiraInstance );
+        }
+        browsePath = "https://" + jiraInstance + "/browse"
 	/*
 	 * issue records which are retrieved on Forge server contain self value like following pattern:
 	 * https://api.atlassian.com/ex/jira/03f3ce7b-7d4b-4363-9370-9e6917312a51/rest/api/2/issue/10597
 	 */
         // console.warn( "could not extract cloud instance from issue.self: " + issue.self );
-        // console.warn( "using supplied / default browsePath: " + browsePath);
+        // console.warn( "using supplied browsePath: " + browsePath);
     }
 
 	return " URL=\"" + browsePath + "/" + issue.key + "\""

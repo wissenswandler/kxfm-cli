@@ -4,7 +4,10 @@ export default class JiraInterface
 {
     #jiraclient = null;
 
-    constructor( jiraCloudInstance, atlassianUser, atlassianPassword, apiVersion = 'latest' )
+    /*
+     * should work with Jira Cloud and Jira Server
+     */
+    constructor( jiraInstance, atlassianUser, atlassianPassword, apiVersion = 'latest' )
     {
         /*
         * NOTE: apiVersion 'latest' seems to be interpreted as '2', at least in case of /search operation!
@@ -12,12 +15,12 @@ export default class JiraInterface
         * 3/search and latest/search return multi-line text fields of ADO type JSON object (see comment below)
         */
         this.#jiraclient = new jiraAPI({
-            protocol: 'https',
-            host: jiraCloudInstance + '.atlassian.net',
+            protocol    : 'https',
+            host        : jiraInstance,
             username    : atlassianUser,
             password    : atlassianPassword,
-            apiVersion: ""+apiVersion, // see NOTE above
-            strictSSL: true
+            apiVersion  : "" + apiVersion, // see NOTE above
+            strictSSL   : true
         });
     }
 
