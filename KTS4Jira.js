@@ -4,36 +4,42 @@
 
 import KTS4SVG from "./KTS4SVG.js";
 
+
+const arrowUp = "▲";
+const arrowDn = "▼";
+
 /*
  * a Set of unqiue objects
  * where identity is defined by the unique_by property
  */
-class UniqueSet extends Set
+class UniqueSet extends Map
 {
   static get unqiue_by() { return "id"; }
 
   add (o) 
   {
-    this.forEach
-    (   i =>
-        {
-            if (this.deepCompare(o, i))
-                throw( "refusing: " + o[ UniqueSet.unqiue_by ] );
-        }
-    );
+    let currentItem = this.get( o[ UniqueSet.unqiue_by ] );
+
+    if (currentItem)
+    {
+        if (this.deepCompare(o, currentItem))
+            throw( "refusing: " + o[ UniqueSet.unqiue_by ] );
+    }
+
     // log the length of the o.fields object [Copilot]
     //console.warn( "adding: " + o.key + " with " + Object.keys(o.fields).length + " fields" );
+    //console.warn( "adding: " + o.id );
 
     this.decorate( o );
 
-    super.add.call(this, o);
+    super.set( o[ UniqueSet.unqiue_by ], o );
     return this;
   };
 
   deepCompare(o, i)
   {
-    // TODO: theoretically handle the case of replacing an issue with less details with one with more details
-    // assuming that 'issues' are harvested first, then linked issues, we always receive the more detailed issue first
+    // TODO: theoretically handle the case of replacing an issue with less details with one with more details;
+    // However, as long as 'issues' are harvested first, then linked issues, we always receive the more detailed issue first
     // so, practically we will never have to deal with such replacement
     //return o.key == i.key && Object.keys(o.fields).length <= Object.keys(i.fields).length;
 
@@ -110,8 +116,7 @@ static safeAdd( set, o )
 */
 static jiraIssueArray2dotString( issueArray, jiraInstance )
 {
-    //put all issues from array into a unique set [Copilot]
-    const issueSet = new JiraIssueSet( issueArray );
+    const issueSet = new JiraIssueSet( issueArray.map( (i) => [ i.id, i ] ) );
     const linkSet  = new JiraIssueLinkSet();   
 
     // add all issues from issuelinks to the set [mostly Copilot]
@@ -136,8 +141,8 @@ static jiraIssueArray2dotString( issueArray, jiraInstance )
                         {
                             this.safeAdd( issueSet, link.outwardIssue );
 
-                            link.o_key = issue.key;
-                            link.s_key = link.outwardIssue.key;
+                            link.o_id = issue.id;
+                            link.s_id = link.outwardIssue.id;
                             delete link.outwardIssue;
                             this.safeAdd( linkSet, link );
                         }
@@ -145,8 +150,8 @@ static jiraIssueArray2dotString( issueArray, jiraInstance )
                         {
                             this.safeAdd( issueSet, link.inwardIssue );
 
-                            link.s_key = issue.key;
-                            link.o_key = link.inwardIssue.key;
+                            link.s_id = issue.id;
+                            link.o_id = link.inwardIssue.id;
                             delete link.inwardIssue;
                             this.safeAdd( linkSet, link );
                         }
@@ -180,8 +185,11 @@ node [
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
      */
     jiraGraph.nodes.forEach
+    //(   key_value_pair =>
     (   issue =>
         {
+            //let issue = key_value_pair[1];
+
             //
             // node definition
             //
@@ -205,15 +213,74 @@ node [
         }
     );
 
-    /*
-     * render edges
-     */
-    jiraGraph.edges.forEach
-    (   link =>
+    tempString += "\n";
+
+    // create array from edges map
+    let edges = Array.from( jiraGraph.edges.values() )
+
+    // sort edges by link type
+    .sort( (a,b) => (a.type.id < b.type.id) ? -1 : (a.type.id > b.type.id) ? 1 : 0  );
+
+    let groupedEdges = edges.reduce // group edges by type
+    (   (acc, link) =>
         {
-            tempString += "\n<" + link.s_key + "> -> <" + link.o_key + ">";
+            let key = link.type.id;
+            if( !acc[key] )
+                acc[key] = [];
+            acc[key].push( link );
+            return acc;
+        }
+    ,   {}
+    );
+
+    // ieteate over grouped edges
+    Object.keys( groupedEdges ).forEach
+    (   linkTypeId =>
+        {
+            let group = groupedEdges[ linkTypeId ];
+
+            let p = group[0].type;
+            let  inwardLabel =  p.inward.replace("▲","");
+            let outwardLabel = p.outward.replace("▼","");
+
+            let predicateNameParts = p.name.split( " -- style: " );
+            let predicateName = predicateNameParts[0];
+            let style = predicateNameParts[1];
+
+            /*
+             * render link type definition
+             */
+            tempString += '\n{'
+            + ' edge ['
+            + (style ? style : this.renderAttributeIfExists( "label" , inwardLabel ) )
+            + ']'
+            + ' # link type: "' + predicateName + '"'
+
+            /*
+            * render edges
+            */
+            group.forEach
+            (   link =>
+                {
+                    let s = jiraGraph.nodes.get( link.s_id );
+                    let o = jiraGraph.nodes.get( link.o_id );
+
+                    let tooltip = `${o.fields.summary} → ${inwardLabel} → ${s.fields.summary} → ${outwardLabel} → ${o.fields.summary}` ;
+                    tempString += `\n<${s.key}> -> <${o.key}>`
+                    + "["
+                    + 'labeltooltip="' + this.safeAttribute( tooltip ) + '"'
+                    +     ' tooltip="' + this.safeAttribute( tooltip ) + '"'
+                    + "]";
+                }
+            );
+
+            /*
+             * end of link type definition
+             */
+            tempString += "\n}";
         }
     );
+
 
     return tempString + "\n}";
 }
@@ -294,7 +361,7 @@ static renderURL( issue, jiraInstance )
 static renderAttributeIfExists( name, value )
 {
     const  safeValue = this.safeAttribute( value );
-    return safeValue == "" ? "" : " " + name + "=\"" + safeValue + "\""
+    return safeValue == "" ? "" : ` ${name}=\"${safeValue}\"`   // mind the leading space to separate attributes in DOT string
 }
 
 /*
