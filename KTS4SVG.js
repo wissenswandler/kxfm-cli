@@ -49,7 +49,10 @@ export default class KTS4SVG
 			/*
 			* keep next 7 lines
 			*/
-			svgarray.slice(1, 8).join("\n")}\n<script xlink:href="${libPath}/graph.js" type="text/ecmascript" />\n${
+			svgarray.slice(1, 8).join("\n")}
+<script xlink:href="${libPath}/graph.js" type="text/ecmascript" />
+<script xlink:href="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.0/dist/svg-pan-zoom.min.js" type="text/ecmascript" />
+${
 			/*
 			* fix GraphViz bug: reverse <title> and first <g> tags so that title will be effective in browser
 			*/
