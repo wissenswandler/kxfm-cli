@@ -30,9 +30,8 @@ class UniqueSet extends Map
     //console.warn( "adding: " + o.key + " with " + Object.keys(o.fields).length + " fields" );
     //console.warn( "adding: " + o.id );
 
-    this.decorate( o );
+    this.set( o[ UniqueSet.unqiue_by ], o );
 
-    super.set( o[ UniqueSet.unqiue_by ], o );
     return this;
   };
 
@@ -44,6 +43,12 @@ class UniqueSet extends Map
     //return o.key == i.key && Object.keys(o.fields).length <= Object.keys(i.fields).length;
 
     return o[ UniqueSet.unqiue_by ] == i[ UniqueSet.unqiue_by ]
+  }
+
+  set( k, v)
+  {
+    this.decorate( v );
+    super.set( k, v );
   }
   
   /*
@@ -71,7 +76,7 @@ class JiraIssueSet extends UniqueSet
     let meta = o.key.includes("META");
     o.isMeta = meta;
 
-    let base_dot_style = meta ? "filled" : "filled,rounded";
+    let base_dot_style = (meta ? "filled" : "filled,rounded");
     switch( o.fields.status.statusCategory.id )
     {
         case 3:
