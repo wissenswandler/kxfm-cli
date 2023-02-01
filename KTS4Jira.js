@@ -178,7 +178,7 @@ static jiraGraph2dotString( jiraGraph, jiraInstance )
 {
     let tempString = `digraph Map {
 graph [
-    class="kts-generated"
+    class="dot_by_kts"
 #   nodesep=0.2
 #   ranksep=0.2
 ]
