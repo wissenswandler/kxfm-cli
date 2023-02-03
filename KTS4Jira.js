@@ -179,12 +179,24 @@ static jiraGraph2dotString( jiraGraph, jiraInstance )
     let tempString = `digraph Map {
 graph [
     class="dot_by_kts"
-#   nodesep=0.2
-#   ranksep=0.2
 ]
 node [
    margin=0.1
 ]`;
+
+/*
+ * TODO: consider these values for tighter layout IF graph grows too large
+ *
+graph [
+   nodesep=0.2
+   ranksep=0.2
+]
+node [
+   margin=0.1
+]`
+ *
+ */
+
 
     /*
      * render nodes first (otherwise references to nodes that are not yet defined will result in naked nodes)
@@ -245,8 +257,10 @@ node [
             let group = groupedEdges[ linkTypeId ];
 
             let p = group[0].type;
-            let  inwardLabel =  p.inward.replace("▲","");
-            let outwardLabel = p.outward.replace("▼","");
+            
+            let  inwardLabel =  p.inward.replace("▲","").trim();
+            let outwardLabel = p.outward.replace("▼","").trim();
+
 
             let predicateNameParts = p.name.split( " -- style: " );
             let predicateName = predicateNameParts[0];
@@ -270,7 +284,7 @@ node [
                     let s = jiraGraph.nodes.get( link.s_id );
                     let o = jiraGraph.nodes.get( link.o_id );
 
-                    let tooltip = `${o.fields.summary} → ${inwardLabel} → ${s.fields.summary} → ${outwardLabel} → ${o.fields.summary}` ;
+                    let tooltip = `${s.fields.summary} –${inwardLabel}→ ${o.fields.summary} –${outwardLabel}→ ${s.fields.summary}` ;
                     tempString += `\n<${s.key}> -> <${o.key}>`
                     + "["
                     + 'labeltooltip="' + this.safeAttribute( tooltip ) + '"'
