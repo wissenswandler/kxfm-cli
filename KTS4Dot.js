@@ -25,7 +25,7 @@ graph [
     splines=true
     style="filled,rounded"
     target=details
-    tooltip=" "
+    tooltip=""
 ]
 node [ id="\\N"
     fillcolor=white
@@ -34,7 +34,7 @@ node [ id="\\N"
     shape=box
     style="filled,rounded"
     target=details
-    tooltip=" "
+    tooltip=""
     width=0
 ]
 edge [ id="\\T___\\H"
@@ -48,6 +48,7 @@ edge [ id="\\T___\\H"
 	 labeltooltip=" "
 	  headtooltip=" "     
 	  tailtooltip=" "
-]`		);
+]
+`		);
 	};
 }

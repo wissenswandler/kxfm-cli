@@ -17,6 +17,9 @@ export default class KTS4SVG
 		}
 
 		// insert helptext placeholder before closing </svg> tag
+		// NOTE: this causes the helptext object to be drawn last and capturing all focus and click events
+		// the problem with reversed order is that Graphviz always draws an unsolicited large filled polcygon as background
+		// which makes the diagram opaque and prevents the helptext -in the background- from being visible
 		svg = svg.replace( /<\/svg>/ , '<foreignObject id="fo0" width="100%" height="100%" display="none"><div id="htmldiv" xmlns="http://www.w3.org/1999/xhtml" /></foreignObject></svg>' );
 
 		// remove width and height attributes from <svg> tag as it causes unpredictable scaling (something like 50% larger than expected)
