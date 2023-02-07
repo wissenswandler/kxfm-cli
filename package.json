@@ -9,6 +9,13 @@
   "version": "1.1.1",
   "description": "Knowledge Transformation System (KTS) implementation in node.js",
   "main": "dot2svg.js",
+  "bin": {
+	  "jira_extract_issues" : "jira_extract_issues.js"
+	  ,
+	  "jira-issues2dot"	: "jira-issues2dot.js"
+	  ,
+	  "dot2svg" : "dot2svg.js" 
+  },
   "scripts": {
     "test": "node jira_extract_issues.js knowhere project=KTSTESTC | node jira-issues2dot.js | node dot2svg.js > graph.svg && firefox graph.svg"
   },

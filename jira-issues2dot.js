@@ -1,10 +1,11 @@
+#!/usr/bin/env node
+
 /*
  * CLI entry into lightweight KTS lib
  */
 
 import KTS4Jira from "./KTS4Jira.js";
 
-// read json array from stdin
 let input = "";
 process.stdin.on
 (   "data",

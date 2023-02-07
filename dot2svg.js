@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from 'fs'
 import chalk from 'chalk'	
 import { build_diagram_from_stdin } from './build_diagram_from_stdin.js'

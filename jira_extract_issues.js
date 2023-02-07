@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  CLI to fetch from Jira Cloud REST API
 
