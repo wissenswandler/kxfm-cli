@@ -5,7 +5,7 @@
     "chalk": "^5.2.0",
     "jira-client": "^8.2.2"
   },
-  "name": "kts-node",
+  "name": "@kxfm/cli",
   "version": "1.1.1",
   "description": "Knowledge Transformation System (KTS) implementation in node.js",
   "main": "dot2svg.js",
@@ -36,4 +36,8 @@
     "url": "https://bitbucket.org/wissenswandler/kts-node/issues"
   },
   "homepage": "https://bitbucket.org/wissenswandler/kts-node#readme"
+  ,
+  "publishConfig" : {
+      "access" : "public"
+  }
 }

@@ -3,6 +3,7 @@
  */
 
 import KTS4SVG from "./KTS4SVG.js";
+import KTS4Dot from "./KTS4Dot.js";
 
 
 const arrowUp = "▲";
@@ -99,7 +100,7 @@ class JiraIssueLinkSet extends UniqueSet
 
 }
 
-export default class KTS4Jira
+export default class KTS4jira2dot
 {
 
 static safeAdd( set, o )
@@ -215,9 +216,9 @@ node [
                 + "<" + issue.key + ">"
                 + " [ "
                 + this.renderHtmlLabel( issue, jiraInstance )
-                + this.renderAttributeIfExists( "tooltip" , issue.fields.description )
+                + KTS4Dot.renderAttributeIfExists( "tooltip" , issue.fields.description )
                 + this.renderURL( issue, jiraInstance )
-                + this.renderAttributeIfExists( "style" , issue.dot_style ) // [Copilot !!]
+                + KTS4Dot.renderAttributeIfExists( "style" , issue.dot_style ) // [Copilot !!]
                 + " ]";
 
             //
@@ -271,7 +272,7 @@ node [
              */
             tempString += '\n{'
             + ' edge ['
-            + (style ? style : this.renderAttributeIfExists( "label" , inwardLabel ) )
+            + (style ? style : KTS4Dot.renderAttributeIfExists( "label" , inwardLabel ) )
             + ']'
             + ' # link type: "' + predicateName + '"'
 
@@ -287,8 +288,8 @@ node [
                     let tooltip = `${s.fields.summary} –${inwardLabel}→ ${o.fields.summary} –${outwardLabel}→ ${s.fields.summary}` ;
                     tempString += `\n<${s.key}> -> <${o.key}>`
                     + "["
-                    + 'labeltooltip="' + this.safeAttribute( tooltip ) + '"'
-                    +     ' tooltip="' + this.safeAttribute( tooltip ) + '"'
+                    + 'labeltooltip="' + KTS4Dot.safeAttribute( tooltip ) + '"'
+                    +     ' tooltip="' + KTS4Dot.safeAttribute( tooltip ) + '"'
                     + "]";
                 }
             );
@@ -377,65 +378,6 @@ static renderURL( issue, jiraInstance )
 	return " URL=\"" + browsePath + "/" + issue.key + "\""
 }
 
-static renderAttributeIfExists( name, value )
-{
-    const  safeValue = this.safeAttribute( value );
-    return safeValue == "" ? "" : ` ${name}=\"${safeValue}\"`   // mind the leading space to separate attributes in DOT string
-}
 
-/*
- * return a string that is safe to use as a label in a DOT file
- * by replacing double quotes with escaped double quotes
- * @param {String} text - text to be used as a label (NOTE it could also be an ADO)
- * @returns {String} - safe text to be used as a label which is delimited by double quotes(!)
- */
-static safeAttribute( text )
-{
-    if( text == null )
-    {
-        //console.warn( "found a NULL text (which is OK)" );
-        return "";
-    } 
-    if( typeof text === "object" )
-    {
-        /* this could be an Atlassian Document Object (ADO) e.g. like that:
-        const ado =
-        {
-            "version":1,
-            "type":"doc",
-            "content":
-            [
-                {
-                    "type":"paragraph",
-                    "content":
-                    [
-                        {
-                            "type":"text",
-                            "text":"Typ-1 Hypervisor (native / bare metal)"
-                        }
-                    ]
-                }
-            ]
-        };
-        */
-        console.warn( "found a text OBJECT (that is not null) and don't know how to handle that, returning empty string: " + JSON.stringify( text ) );
-        return "";
-    }
-    if( ! typeof text.replace === "function" )
-    {
-        console.warn( "found a text that is not a function and don't know how to handle that, returning empty string: " + JSON.stringify( text ) );
-        return "";
-    }
-    try
-    {
-        return text.replace( /"/g, "\\\"" )
-    }
-    catch( error )
-    {
-    	console.error( error );
-	    console.warn( "typeof text: " + typeof text );
-    	return "";
-    }
-}
 
 } // end of class KTS4Jira

@@ -51,4 +51,4 @@ build_diagram_from_string( dot_string, libPath )
 	}
 	return KTS4SVG.rewrite_GraphViz_SVG_to_KTS_SVG( svg, libPath );
 }
-}
+} // end of module.exports

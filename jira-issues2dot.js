@@ -4,7 +4,7 @@
  * CLI entry into lightweight KTS lib
  */
 
-import KTS4Jira from "./KTS4Jira.js";
+import jira2dot from "./KTS4jira2dot.js";
 
 let input = "";
 process.stdin.on
@@ -19,6 +19,6 @@ process.stdin.on
     () =>
     {
         const issueArray = JSON.parse(input);
-        console.log( KTS4Jira.jiraIssueArray2dotString( issueArray , process.argv[2] )  );
+        console.log( jira2dot.jiraIssueArray2dotString( issueArray , process.argv[2] )  );
     }
 );
