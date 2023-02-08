@@ -17,7 +17,7 @@
 	  "dot2svg" : "dot2svg.js" 
   },
   "scripts": {
-    "test": "node jira_extract_issues.js knowhere project=KTSTESTC | node jira-issues2dot.js | node dot2svg.js > graph.svg && firefox graph.svg"
+    "test": "node jira_extract_issues.js knowhere.atlassian.net project=KTSTESTC | node jira-issues2dot.js | node dot2svg.js > graph.svg && firefox graph.svg"
   },
   "repository": {
     "type": "git",
