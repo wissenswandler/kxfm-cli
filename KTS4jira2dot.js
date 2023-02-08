@@ -3,7 +3,7 @@
  */
 
 import KTS4SVG from "./KTS4SVG.js";
-import KTS4Dot from "./KTS4Dot.js";
+import KTS4Dot from "@kxfm/dot";
 
 
 const arrowUp = "▲";

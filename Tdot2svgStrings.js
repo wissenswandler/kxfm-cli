@@ -5,7 +5,7 @@
  * don't chalk here because it does not work in Forge FaaS logging
  */
 import KTS4SVG from './KTS4SVG.js';
-import KTS4Dot from './KTS4Dot.js';
+import KTS4Dot from '@kxfm/dot';
 
 // standard image size to be used for both dimensions
 export const IMAGE_SIZE = 16;
