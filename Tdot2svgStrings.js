@@ -1,19 +1,27 @@
 /*
- * still heavyweight and implementation-dependent
- * TODO: refactor into interface + different implementations in separate packages
+ * lightweight KTS lib for all environments
+ * graphviz implementation must be initialized externally (CLI, Browser)
+ *
+ * don't chalk here because it does not work in Forge FaaS logging
  */
-// DONT chalk because it does not work in Forge FaaS
 import KTS4SVG from './KTS4SVG.js';
 import KTS4Dot from './KTS4Dot.js';
-
-import { Graphviz } from "@hpcc-js/wasm/graphviz";
-const graphviz = await Graphviz.load();
 
 // standard image size to be used for both dimensions
 export const IMAGE_SIZE = 16;
 
-export default 
+export default class Tdot2svgStrings
 {
+	graphviz = null;
+
+	constructor( graphvizImplementation	)
+	{
+		if( graphvizImplementation == null )
+			throw new Error( "graphvizImplementation must not be null" );
+
+		this.graphviz = graphvizImplementation;
+	}
+
 /*
  * build diagram from DOT source string
  *
@@ -31,12 +39,12 @@ build_diagram_from_string( dot_string, libPath )
 
 	let kts_dot = KTS4Dot.preprocess(dot_string);
 
-	let unflat_dot = graphviz.unflatten( kts_dot, 5, true, 5);
+	let unflat_dot = this.graphviz.unflatten( kts_dot, 5, true, 5);
 	
 	let svg = null;
 	try
 	{
-		svg = graphviz.dot( unflat_dot, "svg", { images: imageAttributeArray } );
+		svg = this.graphviz.dot( unflat_dot, "svg", { images: imageAttributeArray } );
 	}
 	catch (e)
 	{

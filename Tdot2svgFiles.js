@@ -1,6 +1,16 @@
+/*
+ * lightweight KTS lib for node.js
+ *
+ * depends on files, so using chalk is OK
+ * will not work in Forge FaaS or Browser
+ */
+
 import chalk from 'chalk';
 import fs from 'fs';
-import KTS4dot2svg from './KTS4dot2svg.js';
+import KTS4dot2svg from './Tdot2svgStrings.js';
+
+export default class Tdot2svgFiles
+{
 
 /*
  * build diagram from DOT source file
@@ -9,7 +19,7 @@ import KTS4dot2svg from './KTS4dot2svg.js';
 	[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]
 	this helps in case of "warning: no value for width of non-ascii character"
  */
-export function build_diagram_from_file( log_comment, dotsource_filename, svgproduct_filename, libPath )
+static build_diagram_from_file( log_comment, dotsource_filename, svgproduct_filename, graphviz, libPath )
 {
 	console.warn(chalk.grey(log_comment));
 
@@ -18,7 +28,9 @@ export function build_diagram_from_file( log_comment, dotsource_filename, svgpro
 			return console.error(chalk.red(err));
 		}
 
-		const svg_kts = KTS4dot2svg.build_diagram_from_string( data, libPath );
+		let transformer = new KTS4dot2svg( graphviz );
+
+		const svg_kts = transformer.build_diagram_from_string( data, libPath );
 
 		fs.writeFile( svgproduct_filename, svg_kts, err => {
 			if (err) {
@@ -30,3 +42,5 @@ export function build_diagram_from_file( log_comment, dotsource_filename, svgpro
 		});
 	});
 }
+
+} // end class Tdot2svgFiles
