@@ -17,21 +17,23 @@
 	  "dot2svg" : "dot2svg.js" 
   },
   "scripts": {
+    "build" : "npm link @kxfm/jira2dot @kxfm/dot @kxfm/dot2svg @kxfm/svg"
+    ,
+    "clean" : "git clean -fX"
+    ,
     "test" : "npm run test123"
     ,
-    "test1": "node jira_extract_issues.js knowhere.atlassian.net project=KTSTESTC > issues.json"
+    "test1": "jira_extract_issues knowhere.atlassian.net project=KTSTESTC > issues.json"
     ,
-    "test2": "cat issues.json | node jira-issues2dot.js > graph.dot"
+    "test2": "cat issues.json | jira-issues2dot > graph.dot"
     ,
-    "test3": "node dot2svg.js -f"
+    "test3": "dot2svg -f"
     ,
-    "test123": "node jira_extract_issues.js knowhere.atlassian.net project=KTSTESTC | node jira-issues2dot.js | node dot2svg.js > graph.svg"
+    "test123": "jira_extract_issues knowhere.atlassian.net project=KTSTESTC | jira-issues2dot | dot2svg > graph.svg"
     ,
     "test123v": "npm run test123 && npm run testv"
     ,
     "testv": "firefox graph.svg"
-    ,
-    "unit_test3" : "node tests/test_kts-svg_hello-world.js"
   },
   "repository": {
     "type": "git",
