@@ -19,9 +19,19 @@
   "scripts": {
     "test" : "npm run test123"
     ,
-    "test123": "node jira_extract_issues.js knowhere.atlassian.net project=KTSTESTC | node jira-issues2dot.js | node dot2svg.js > graph.svg && firefox graph.svg"
+    "test1": "node jira_extract_issues.js knowhere.atlassian.net project=KTSTESTC > issues.json"
     ,
-    "test3" : "node tests/test_kts-svg_hello-world.js"
+    "test2": "cat issues.json | node jira-issues2dot.js > graph.dot"
+    ,
+    "test3": "node dot2svg.js -f"
+    ,
+    "test123": "node jira_extract_issues.js knowhere.atlassian.net project=KTSTESTC | node jira-issues2dot.js | node dot2svg.js > graph.svg"
+    ,
+    "test123v": "npm run test123 && npm run testv"
+    ,
+    "testv": "firefox graph.svg"
+    ,
+    "unit_test3" : "node tests/test_kts-svg_hello-world.js"
   },
   "repository": {
     "type": "git",

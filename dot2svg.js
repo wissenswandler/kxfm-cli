@@ -8,11 +8,11 @@
  * graphviz renderer is constructed here
  */
 
+import { exit } from 'process';
 import fs from 'fs'
 import chalk from 'chalk'	
-import streamTransformer from './Tdot2svgStreams.js'
-import fileTransformer from './Tdot2svgFiles.js'
-import { exit } from 'process';
+import streamTransformer	from '@kxfm/dot2svg/Tdot2svgStreams.js'
+import fileTransformer		from '@kxfm/dot2svg/Tdot2svgFiles.js'
 
 import { Graphviz } from "@hpcc-js/wasm/graphviz";
 const graphviz = await Graphviz.load();
@@ -87,7 +87,7 @@ if( ! Boolean( process.stdin.isTTY ) && process.argv.length === 2 )
 	{
 		console.warn( chalk.yellowBright ( `ignoring command line argument "${process.argv[2]}" because we are piped to.` ) )
 	}
-
+	console.warn(chalk.green("reading DOT source from stdin. Type CTRL-D to signal end of your input..."));
 	streamTransformer.build_diagram_from_stdin( libPath, graphviz );
 }
 else
@@ -117,20 +117,20 @@ fs.stat( dotsource_filename, (err, source_stats) =>
 	{
 		if (err)
 		{
-	 		fileTransformer.build_diagram_from_file( `initial build of missing "${svgproduct_filename}" from "${dotsource_filename}"`, dotsource_filename, svgproduct_filename, graphviz, libPath )
+	 		log_and_build_diagram_from_file( `initial build of missing "${svgproduct_filename}" from "${dotsource_filename}"`, dotsource_filename, svgproduct_filename, graphviz, libPath )
 			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath );
 		}
 		else
 		if (source_stats.mtime > product_stats.mtime)
 		{
-	 		fileTransformer.build_diagram_from_file( `update build from input "${dotsource_filename}" (which is newer than "${svgproduct_filename}")`, dotsource_filename, svgproduct_filename, graphviz, libPath  )
+	 		log_and_build_diagram_from_file( `update build from input "${dotsource_filename}" (which is newer than "${svgproduct_filename}")`, dotsource_filename, svgproduct_filename, graphviz, libPath  )
 			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath );
 		}
 		else
 		// both source and product exist and product is up to date
 		if( force_build )
 		{
-	 		fileTransformer.build_diagram_from_file( `forcing (new) build from input "${dotsource_filename}" (which is older than "${svgproduct_filename}")`, dotsource_filename, svgproduct_filename, graphviz, libPath )
+	 		log_and_build_diagram_from_file( `forcing (new) build from input "${dotsource_filename}" (which is older than "${svgproduct_filename}")`, dotsource_filename, svgproduct_filename, graphviz, libPath )
 			if( watch )	watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_filename, libPath );
 		}
 		else
@@ -149,7 +149,14 @@ function watch_sourcefile_to_build_productfile( dotsource_filename, svgproduct_f
 	(	dotsource_filename,
 		() =>
 		{
-			fileTransformer.build_diagram_from_file(`\n${dotsource_filename} was touched,`, dotsource_filename, svgproduct_filename, graphviz, libPath);
+			log_and_build_diagram_from_file(`\n${dotsource_filename} was touched,`, dotsource_filename, svgproduct_filename, graphviz, libPath);
 		}
 	)
+}
+
+
+function log_and_build_diagram_from_file( log_comment, dotsource_filename, svgproduct_filename, graphviz, libPath )
+{
+	console.warn(  chalk.grey( log_comment )  );
+	fileTransformer.build_diagram_from_file( dotsource_filename, svgproduct_filename, graphviz, libPath )
 }

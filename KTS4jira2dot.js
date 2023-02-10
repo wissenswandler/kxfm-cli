@@ -2,7 +2,7 @@
  * lightweight KTS lib (no dependencies)
  */
 
-import KTS4SVG from "./KTS4SVG.js";
+import KTS4SVG from "@kxfm/svg";
 import KTS4Dot from "@kxfm/dot";
 
 
