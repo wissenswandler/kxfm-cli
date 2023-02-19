@@ -41,7 +41,7 @@ const testLib = libPath + "/graph.js";
 try
 {
 	fs.accessSync( testLib );
-	console.warn( chalk.green( `using local library ${testLib}` ) );
+	console.warn( chalk.green( `using local library ${testLib} (+ .css)` ) );
 }
 catch (err)
 {
